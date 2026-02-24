@@ -1,0 +1,3 @@
+*.bsp
+.venv/
+__pycache__/
