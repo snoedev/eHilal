@@ -4,6 +4,31 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 
+MYDS_LIGHT = {
+    "primary": "#2563EB",
+    "danger": "#B91C1C",
+    "success": "#15803D",
+    "warning": "#A16207",
+    "text": "#18181B",
+    "text_muted": "#6B6B74",
+    "border": "#E4E4E7",
+    "washed": "#F4F4F5",
+    "white": "#FFFFFF",
+}
+
+MYDS_DARK = {
+    "primary": "#6394FF",
+    "danger": "#F87171",
+    "success": "#22C55E",
+    "warning": "#EAB308",
+    "text": "#FFFFFF",
+    "text_muted": "#A1A1AA",
+    "border": "#3F3F46",
+    "washed": "#27272A",
+    "white": "#18181B",
+}
+
+
 def _wrap_az_deg(az):
     return (az + 360.0) % 360.0
 
@@ -51,7 +76,9 @@ def plot_hilal_chart_pretty(
     elong_actual_deg,
     title,
     subtitle=None,
+    dark_mode=False,
 ):
+    palette = MYDS_DARK if dark_mode else MYDS_LIGHT
     center_az = float(sun_az_deg)
     span = 35.0
     az_min = center_az - span
@@ -77,41 +104,80 @@ def plot_hilal_chart_pretty(
     y_min = max(-10, min(y_candidates) - 1.8)
     y_max = min(30, max(y_candidates) + 2.5)
 
-    fig = plt.figure(figsize=(12, 6))
+    fig = plt.figure(figsize=(12, 6), facecolor=palette["white"])
     ax = fig.add_subplot(111)
-    ax.axhline(0, linestyle="--", linewidth=1.5, color="gray", alpha=0.8, label="Ufuk (0°)")
+    ax.set_facecolor(palette["white"])
+    ax.axhline(
+        0,
+        linestyle="--",
+        linewidth=1.5,
+        color=palette["text_muted"],
+        alpha=0.9,
+        label="Ufuk (0°)",
+    )
     ax.axhline(
         alt_min_deg,
         linestyle="--",
         linewidth=2.2,
-        color="red",
+        color=palette["danger"],
         alpha=0.9,
-        label=f"{alt_min_deg:.1f}° Altitud Minimum",
+        label=f"Had altitud {alt_min_deg:.1f}°",
     )
 
-    ax.scatter([sun_az_deg], [sun_alt_deg], s=80, label="Matahari @ Maghrib", zorder=6)
-    ax.scatter([moon_az_deg], [moon_alt_deg], s=80, label="Bulan @ Maghrib", zorder=7)
+    ax.scatter(
+        [sun_az_deg],
+        [sun_alt_deg],
+        s=80,
+        color=palette["warning"],
+        label="Matahari ketika terbenam",
+        zorder=6,
+    )
+    ax.scatter(
+        [moon_az_deg],
+        [moon_alt_deg],
+        s=80,
+        color=palette["primary"],
+        label="Bulan ketika matahari terbenam",
+        zorder=7,
+    )
 
     right_side_free = True if wrap else (sun_az_deg - az_min) < (az_max - sun_az_deg)
 
-    ax.plot([moon_az_deg, moon_az_deg], [0, moon_alt_deg], linewidth=3.0, alpha=0.85, label="Tinggi Hilal", zorder=4)
+    ax.plot(
+        [moon_az_deg, moon_az_deg],
+        [0, moon_alt_deg],
+        linewidth=3.0,
+        color=palette["primary"],
+        alpha=0.85,
+        label="Tinggi hilal",
+        zorder=4,
+    )
     ax.plot(
         [sun_az_deg, moon_az_deg],
         [sun_alt_deg, moon_alt_deg],
         linewidth=3.0,
+        color=palette["success"],
         alpha=0.85,
-        label="Jarak Lengkung",
+        label="Jarak lengkung",
         zorder=4,
-    )  
+    )
 
-    ax.plot(az_grid, alt_el_min, linestyle="--", linewidth=1.5, label=f"{elong_min_deg:.1f}° Had Elongasi", zorder=2)
+    ax.plot(
+        az_grid,
+        alt_el_min,
+        color=palette["danger"],
+        linestyle="--",
+        linewidth=1.5,
+        label=f"Had elongasi {elong_min_deg:.1f}°",
+        zorder=2,
+    )
     ax.plot(
         az_grid,
         alt_el_act,
-        color="purple",
+        color=palette["success"],
         linestyle=":",
         linewidth=2.0,
-        label=f"Garis Elongasi (~= {elong_actual_deg:.2f}°)",
+        label=f"Elongasi sebenar ({elong_actual_deg:.2f}°)",
         zorder=2,
     )
 
@@ -121,15 +187,20 @@ def plot_hilal_chart_pretty(
         f"Tinggi: {moon_alt_deg:.2f}°\nJarak Lengkung: {elong_actual_deg:.2f}°",
         xy=(moon_az_deg, moon_alt_deg),
         xytext=(moon_az_deg + dx, moon_alt_deg + dy),
-        arrowprops=dict(arrowstyle="->", linewidth=1),
+        arrowprops=dict(arrowstyle="->", linewidth=1, color=palette["text_muted"]),
         fontsize=10,
-        bbox=dict(boxstyle="round,pad=0.3", alpha=0.15),
+        color=palette["text"],
+        bbox=dict(
+            boxstyle="round,pad=0.4,rounding_size=0.2",
+            facecolor=palette["washed"],
+            edgecolor=palette["border"],
+        ),
         zorder=10,
     )
 
-    ax.set_xlabel("Azimut (darjah)")
-    ax.set_ylabel("Altitud (darjah)")
-    ax.set_title(title, fontsize=12, fontweight="bold", pad=22)
+    ax.set_xlabel("Azimut (darjah)", color=palette["text"])
+    ax.set_ylabel("Altitud (darjah)", color=palette["text"])
+    ax.set_title(title, fontsize=14, fontweight="semibold", color=palette["text"], pad=22)
     if subtitle:
         ax.text(
             0.5,
@@ -139,14 +210,21 @@ def plot_hilal_chart_pretty(
             ha="center",
             va="bottom",
             fontsize=11,
-            alpha=0.85,
+            color=palette["text_muted"],
         )
 
     ax.set_ylim(y_min, y_max)
     if not wrap:
         ax.set_xlim(az_min, az_max)
-    ax.grid(True, linewidth=0.6, alpha=0.35)
-    ax.legend(loc="upper center", bbox_to_anchor=(0.5, -0.12), ncol=3, frameon=True)
+    ax.tick_params(colors=palette["text_muted"])
+    for spine in ax.spines.values():
+        spine.set_color(palette["border"])
+    ax.grid(True, linewidth=0.6, color=palette["border"], alpha=0.8)
+    legend = ax.legend(loc="upper center", bbox_to_anchor=(0.5, -0.12), ncol=3, frameon=True)
+    legend.get_frame().set_edgecolor(palette["border"])
+    legend.get_frame().set_facecolor(palette["white"])
+    for text in legend.get_texts():
+        text.set_color(palette["text"])
 
     fig.tight_layout()
     return fig

@@ -2,6 +2,9 @@
 
 Aplikasi kiraan hilal (Imkanur Rukyah MABIMS) menggunakan `Streamlit` + `Skyfield`.
 
+Antara muka menyediakan tema terang dan gelap, susun atur responsif, jadual perbandingan lokasi,
+serta graf altitud dan azimut yang mengikut tema pilihan pengguna.
+
 ## Keperluan
 
 - Python 3.10+ (disyorkan)
@@ -16,7 +19,7 @@ cd c:\laragon\www\eHilal
 python -m venv .venv
 .\.venv\Scripts\Activate.ps1
 python -m pip install --upgrade pip
-pip install streamlit pandas numpy matplotlib skyfield
+pip install -r requirements.txt
 ```
 
 ### macOS / Linux (bash/zsh)
@@ -26,7 +29,7 @@ cd /path/to/eHilal
 python3 -m venv .venv
 source .venv/bin/activate
 python -m pip install --upgrade pip
-pip install streamlit pandas numpy matplotlib skyfield
+pip install -r requirements.txt
 ```
 
 ## Jalankan App
@@ -59,4 +62,3 @@ __pycache__/
 ```
 
 3. Biar pengguna download ephemeris semasa run pertama.
-
